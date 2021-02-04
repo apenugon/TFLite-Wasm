@@ -14,10 +14,12 @@ limitations under the License.
 ==============================================================================*/
 #include <string>
 
+#define TFLITE_SUPPORTS_GPU_DELEGATE
+
 #include "tensorflow/lite/tools/delegates/delegate_provider.h"
 #include "tensorflow/lite/tools/evaluation/utils.h"
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-#include "tensorflow/lite/delegates/gpu/delegate.h"
+#include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 #elif defined(__APPLE__)
 #include "TargetConditionals.h"
 #if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
@@ -110,27 +112,28 @@ TfLiteDelegatePtr GpuDelegateProvider::CreateTfLiteDelegate(
 
   if (params.Get<bool>("use_gpu")) {
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-    TfLiteGpuDelegateOptionsV2 gpu_opts = TfLiteGpuDelegateOptionsV2Default();
+    TfLiteGpuDelegateOptions gpu_opts = TfLiteGpuDelegateOptions();
     if (params.Get<bool>("gpu_precision_loss_allowed")) {
-      gpu_opts.inference_priority1 = TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY;
-      gpu_opts.inference_priority2 =
-          TFLITE_GPU_INFERENCE_PRIORITY_MIN_MEMORY_USAGE;
-      gpu_opts.inference_priority3 =
-          TFLITE_GPU_INFERENCE_PRIORITY_MAX_PRECISION;
+      gpu_opts.compile_options.precision_loss_allowed = 1;
+	    //gpu_opts.inference_priority1 = TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY;
+      //gpu_opts.inference_priority2 =
+      //    TFLITE_GPU_INFERENCE_PRIORITY_MIN_MEMORY_USAGE;
+      //gpu_opts.inference_priority3 =
+      //    TFLITE_GPU_INFERENCE_PRIORITY_MAX_PRECISION;
     }
-    if (params.Get<bool>("gpu_experimental_enable_quant")) {
-      gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_ENABLE_QUANT;
-    }
+    //if (params.Get<bool>("gpu_experimental_enable_quant")) {
+    //  gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_ENABLE_QUANT;
+    //}
     std::string gpu_backend = params.Get<std::string>("gpu_backend");
     if (!gpu_backend.empty()) {
-      if (gpu_backend == "cl") {
-        gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_CL_ONLY;
-      } else if (gpu_backend == "gl") {
-        gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_GL_ONLY;
-      }
+      //if (gpu_backend == "cl") {
+      //  gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_CL_ONLY;
+      //} else if (gpu_backend == "gl") {
+        //gpu_opts.experimental_flags |= TFLITE_GPU_EXPERIMENTAL_FLAGS_GL_ONLY;
+      //}
     }
-    gpu_opts.max_delegated_partitions =
-        params.Get<int>("max_delegated_partitions");
+    //gpu_opts.max_delegated_partitions =
+    //    params.Get<int>("max_delegated_partitions");
     delegate = evaluation::CreateGPUDelegate(&gpu_opts);
 #elif defined(REAL_IPHONE_DEVICE)
     TFLGpuDelegateOptions gpu_opts = {0};

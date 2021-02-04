@@ -28,7 +28,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-#include "tensorflow/lite/delegates/gpu/delegate.h"
+#include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 #endif
 
 #if defined(__ANDROID__) && (defined(__arm__) || defined(__aarch64__))
@@ -73,7 +73,7 @@ TfLiteDelegatePtr CreateNNAPIDelegate(StatefulNnApiDelegate::Options options);
 
 TfLiteDelegatePtr CreateGPUDelegate();
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-TfLiteDelegatePtr CreateGPUDelegate(TfLiteGpuDelegateOptionsV2* options);
+TfLiteDelegatePtr CreateGPUDelegate(TfLiteGpuDelegateOptions* options);
 #endif
 
 TfLiteDelegatePtr CreateHexagonDelegate(

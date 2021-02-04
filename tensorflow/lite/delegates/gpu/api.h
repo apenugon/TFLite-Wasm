@@ -39,11 +39,11 @@ limitations under the License.
 
 #include "absl/types/span.h"
 #include "absl/types/variant.h"
-#include <CL/cl.h>
+//#include <CL/cl.h>
 #include "tensorflow/lite/delegates/gpu/common/data_type.h"
 #include "tensorflow/lite/delegates/gpu/common/status.h"
 #include "tensorflow/lite/delegates/gpu/common/util.h"
-#include <vulkan/vulkan.h>
+//#include <vulkan/vulkan.h>
 
 #define GL_NO_PROTOTYPES
 #define EGL_NO_PROTOTYPES
@@ -95,7 +95,7 @@ struct OpenGlTexture {
   GLuint id = GL_INVALID_INDEX;
   GLenum format = GL_INVALID_ENUM;
 };
-
+/*
 struct OpenClBuffer {
   OpenClBuffer() = default;
   explicit OpenClBuffer(cl_mem new_memobj) : memobj(new_memobj) {}
@@ -110,7 +110,9 @@ struct OpenClTexture {
   cl_mem memobj = nullptr;
   // TODO(akulik): should it specify texture format?
 };
+*/
 
+/*
 struct VulkanBuffer {
   VulkanBuffer() = default;
   explicit VulkanBuffer(VkBuffer buffer_, VkDeviceSize size_,
@@ -143,6 +145,7 @@ struct VulkanMemory {
   VkDeviceSize size;
   VkDeviceSize offset;
 };
+*/
 
 struct CpuMemory {
   CpuMemory() = default;
@@ -229,8 +232,8 @@ bool IsValid(const TensorObjectDef& def);
 uint32_t NumElements(const TensorObjectDef& def);
 
 using TensorObject =
-    absl::variant<absl::monostate, OpenGlBuffer, OpenGlTexture, CpuMemory,
-                  OpenClBuffer, OpenClTexture, VulkanBuffer, VulkanTexture>;
+    absl::variant<absl::monostate, OpenGlBuffer, OpenGlTexture, CpuMemory>;
+                  //OpenClBuffer, OpenClTexture, VulkanBuffer, VulkanTexture>;
 
 // @return true if object is set and corresponding values are defined.
 bool IsValid(const TensorObjectDef& def, const TensorObject& object);

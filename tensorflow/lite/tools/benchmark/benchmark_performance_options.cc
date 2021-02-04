@@ -21,11 +21,13 @@ limitations under the License.
 #include <sstream>
 #include <utility>
 
+#define __ANDROID__
+
 #include "tensorflow/core/util/stats_calculator.h"
 #include "tensorflow/lite/c/common.h"
 #if defined(__ANDROID__)
 #include "tensorflow/lite/delegates/gpu/delegate.h"
-#include "tensorflow/lite/nnapi/nnapi_util.h"
+//#include "tensorflow/lite/nnapi/nnapi_util.h"
 #endif
 #include "tensorflow/lite/profiling/time.h"
 #include "tensorflow/lite/tools/benchmark/benchmark_params.h"
@@ -44,15 +46,11 @@ namespace benchmark {
 std::string MultiRunStatsRecorder::PerfOptionName(
     const BenchmarkParams& params) const {
 #if defined(__ANDROID__)
-  if (params.Get<bool>("use_nnapi")) {
-    const std::string accelerator =
-        params.Get<std::string>("nnapi_accelerator_name");
-    return accelerator.empty() ? "nnapi(w/o accel name)"
-                               : "nnapi(" + accelerator + ")";
-  }
 #endif
+  TFLITE_LOG(INFO) << "Getting use gpu";
 
   if (params.Get<bool>("use_gpu")) {
+    TFLITE_LOG(INFO) << "Here";
 #if defined(__ANDROID__)
     if (params.Get<bool>("gpu_precision_loss_allowed")) {
       return "gpu-fp16";
@@ -229,16 +227,16 @@ void BenchmarkPerformanceOptions::ResetPerformanceOptions() {
   single_option_run_params_->Set<bool>("use_gpu", false);
 #if defined(__ANDROID__)
   single_option_run_params_->Set<bool>("gpu_precision_loss_allowed", true);
-  single_option_run_params_->Set<bool>("use_nnapi", false);
-  single_option_run_params_->Set<std::string>("nnapi_accelerator_name", "");
-  single_option_run_params_->Set<bool>("disable_nnapi_cpu", false);
-  single_option_run_params_->Set<int>("max_delegated_partitions", 0);
-  single_option_run_params_->Set<bool>("nnapi_allow_fp16", false);
+//  single_option_run_params_->Set<bool>("use_nnapi", false);
+//  single_option_run_params_->Set<std::string>("nnapi_accelerator_name", "");
+//  single_option_run_params_->Set<bool>("disable_nnapi_cpu", false);
+//  single_option_run_params_->Set<int>("max_delegated_partitions", 0);
+//  single_option_run_params_->Set<bool>("nnapi_allow_fp16", false);
 #endif
 #if defined(TFLITE_ENABLE_HEXAGON)
-  single_option_run_params_->Set<bool>("use_hexagon", false);
+//  single_option_run_params_->Set<bool>("use_hexagon", false);
 #endif
-  single_option_run_params_->Set<bool>("use_xnnpack", false);
+//  single_option_run_params_->Set<bool>("use_xnnpack", false);
 }
 
 void BenchmarkPerformanceOptions::CreatePerformanceOptions() {
@@ -273,6 +271,7 @@ void BenchmarkPerformanceOptions::CreatePerformanceOptions() {
 
   if (benchmark_all || HasOption("gpu")) {
 #if defined(__ANDROID__)
+    TFLITE_LOG(INFO) << "Should be defining GPU stuff";
     const std::vector<bool> allow_precision_loss = {true, false};
     for (const auto precision_loss : allow_precision_loss) {
       BenchmarkParams params;
@@ -287,7 +286,8 @@ void BenchmarkPerformanceOptions::CreatePerformanceOptions() {
     all_run_params_.emplace_back(std::move(params));
 #endif
   }
-
+  TFLITE_LOG(INFO) << "Done defining stuff";
+/*
 #if defined(__ANDROID__)
   if (benchmark_all || HasOption("nnapi")) {
     std::string nnapi_accelerators = nnapi::GetStringDeviceNamesList();
@@ -322,6 +322,7 @@ void BenchmarkPerformanceOptions::CreatePerformanceOptions() {
     all_run_params_.emplace_back(std::move(params));
   }
 #endif
+*/
 }
 
 void BenchmarkPerformanceOptions::Run() {
@@ -339,13 +340,21 @@ void BenchmarkPerformanceOptions::Run() {
 
   // Now perform all runs, each with different performance-affecting parameters.
   for (const auto& run_params : all_run_params_) {
+
+    TFLITE_LOG(INFO) << "Starting";
     // If the run_params is empty, then it means "none" is set for
     // --perf_options_list.
     if (!run_params.Empty()) {
       // Reset all performance-related options before any runs.
+      //
+      TFLITE_LOG(INFO) << "Setting run params";
       ResetPerformanceOptions();
+
+      TFLITE_LOG(INFO) << "Resetted run params";
       single_option_run_params_->Set(run_params);
     }
+
+    TFLITE_LOG(INFO) << "going";
     util::SleepForSeconds(params_.Get<float>("option_benchmark_run_delay"));
 
     // Clear internally created listeners before each run but keep externally

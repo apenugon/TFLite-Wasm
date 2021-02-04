@@ -317,9 +317,11 @@ std::vector<Flag> BenchmarkTfLiteModel::GetFlags() {
           "prints to stdout.")};
 
   flags.insert(flags.end(), specific_flags.begin(), specific_flags.end());
+  TFLITE_LOG(INFO) << "Inserting Flags";
 
   for (const auto& delegate_provider :
        tools::GetRegisteredDelegateProviders()) {
+    TFLITE_LOG(INFO) << "Adding delegate";
     auto delegate_flags = delegate_provider->CreateFlags(&params_);
     flags.insert(flags.end(), delegate_flags.begin(), delegate_flags.end());
   }

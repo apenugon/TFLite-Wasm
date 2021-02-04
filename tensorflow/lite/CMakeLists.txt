@@ -204,20 +204,36 @@ if(TFLITE_ENABLE_FLEX)
   )
 endif()
 if(TFLITE_ENABLE_GPU)
-  find_package(opencl_headers REQUIRED)
-  find_package(vulkan_headers REQUIRED)
+	#find_package(opencl_headers REQUIRED)
+	#find_package(vulkan_headers REQUIRED)
   find_package(fp16_headers REQUIRED)
   # Android NDK already has OpenGL, EGL headers.
-  if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
-    find_package(opengl_headers REQUIRED)
-    find_package(egl_headers REQUIRED)
-  endif()
+  #if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+  find_package(opengl_headers REQUIRED)
+  find_package(egl_headers REQUIRED)
+    #endif()
   populate_tflite_source_vars(
-    "delegates/gpu/cl" TFLITE_DELEGATES_GPU_CL_SRCS
+    "delegates/gpu/gl" TFLITE_DELEGATES_GPU_CL_SRCS
     FILTER "(_test|gl_interop|gpu_api_delegate|egl_sync)\\.(cc|h)$"
   )
   populate_tflite_source_vars(
-    "delegates/gpu/cl/kernels" TFLITE_DELEGATES_GPU_CL_KERNELS_SRCS
+    "delegates/gpu/gl/kernels" TFLITE_DELEGATES_GPU_CL_KERNELS_SRCS
+    FILTER "(_test)\\.(cc|h)$"
+  )
+  populate_tflite_source_vars(
+	  "delegates/gpu/gl/compiler" TFLITE_DELEGATES_GPU_CL_COMPILER_SRCS
+    FILTER "(_test)\\.(cc|h)$"
+  )
+  populate_tflite_source_vars(
+	  "delegates/gpu/gl/converters" TFLITE_DELEGATES_GPU_CL_CONVERTERS_SRCS
+    FILTER "(_test)\\.(cc|h)$"
+  )
+  populate_tflite_source_vars(
+	  "delegates/gpu/gl/runtime" TFLITE_DELEGATES_GPU_CL_RUNTIME_SRCS
+    FILTER "(_test)\\.(cc|h)$"
+  )
+  populate_tflite_source_vars(
+	  "delegates/gpu/gl/workgroups" TFLITE_DELEGATES_GPU_CL_WORKGROUPS_SRCS
     FILTER "(_test)\\.(cc|h)$"
   )
   populate_tflite_source_vars(
@@ -263,10 +279,14 @@ if(TFLITE_ENABLE_GPU)
   )
   list(APPEND TFLITE_DELEGATES_GPU_SRCS
     ${TFLITE_SOURCE_DIR}/delegates/gpu/api.cc
-    ${TFLITE_SOURCE_DIR}/delegates/gpu/delegate.cc
+    ${TFLITE_SOURCE_DIR}/delegates/gpu/gl_delegate.cc
     ${TFLITE_SOURCE_DIR}/experimental/acceleration/compatibility/android_info.cc
     ${TFLITE_DELEGATES_GPU_CL_SRCS}
     ${TFLITE_DELEGATES_GPU_CL_KERNELS_SRCS}
+    ${TFLITE_DELEGATES_GPU_CL_COMPILER_SRCS}
+    ${TFLITE_DELEGATES_GPU_CL_CONVERTERS_SRCS}
+    ${TFLITE_DELEGATES_GPU_CL_RUNTIME_SRCS}
+    ${TFLITE_DELEGATES_GPU_CL_WORKGROUPS_SRCS}
     ${TFLITE_DELEGATES_GPU_COMMON_DEFAULT_SRCS}
     ${TFLITE_DELEGATES_GPU_COMMON_MEMORY_MANAGEMENT_SRCS}
     ${TFLITE_DELEGATES_GPU_COMMON_SELECTORS_SRCS}

@@ -117,18 +117,18 @@ TfLiteDelegatePtr CreateNNAPIDelegate(StatefulNnApiDelegate::Options options) {
 }
 
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-TfLiteDelegatePtr CreateGPUDelegate(TfLiteGpuDelegateOptionsV2* options) {
-  return TfLiteDelegatePtr(TfLiteGpuDelegateV2Create(options),
-                           &TfLiteGpuDelegateV2Delete);
+TfLiteDelegatePtr CreateGPUDelegate(TfLiteGpuDelegateOptions* options) {
+  return TfLiteDelegatePtr(TfLiteGpuDelegateCreate(options),
+                           &TfLiteGpuDelegateDelete);
 }
 #endif  // TFLITE_SUPPORTS_GPU_DELEGATE
 
 TfLiteDelegatePtr CreateGPUDelegate() {
 #if TFLITE_SUPPORTS_GPU_DELEGATE
-  TfLiteGpuDelegateOptionsV2 options = TfLiteGpuDelegateOptionsV2Default();
-  options.inference_priority1 = TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY;
-  options.inference_preference =
-      TFLITE_GPU_INFERENCE_PREFERENCE_SUSTAINED_SPEED;
+  TfLiteGpuDelegateOptions options = TfLiteGpuDelegateOptionsDefault();
+  //options.inference_priority1 = TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY;
+  //options.inference_preference =
+  //    TFLITE_GPU_INFERENCE_PREFERENCE_SUSTAINED_SPEED;
 
   return CreateGPUDelegate(&options);
 #else

@@ -53,16 +53,17 @@ INCLUDES += -I/usr/local/include
 # These are the default libraries needed, but they can be added to or
 # overridden by the platform-specific settings in target makefiles.
 LIBS := \
--lstdc++ \
 -lpthread \
--lm \
--lz \
--ldl
+-lnodefs.js 
+#-lstdc++ \
+#-lm \
+#-lz \
+#-ldl
 
 # There are no rules for compiling objects for the host system (since we don't
 # generate things like the protobuf compiler that require that), so all of
 # these settings are for the target compiler.
-CFLAGS := -O3 -DNDEBUG -DCPU_SETSIZE=__CPU_SETSIZE -fPIC $(EXTRA_CFLAGS)
+CFLAGS := -s ASSERTIONS=1 -s TOTAL_MEMORY=100MB -O3 -pthread -DTFLITE_ENABLE_GPU=ON #-DCPU_SETSIZE=__CPU_SETSIZE -fPIC $(EXTRA_CFLAGS)
 CXXFLAGS := $(CFLAGS) --std=c++11 $(EXTRA_CXXFLAGS)
 LDOPTS := -L/usr/local/lib
 ARFLAGS := -r
@@ -73,12 +74,12 @@ ifeq ($(HOST_OS),windows)
 CXXFLAGS += -fext-numeric-literals -D__LITTLE_ENDIAN__
 endif
 
-ifeq ($(TARGET_ARCH),x86_64)
-  ifeq ($(TARGET),linux)
-    CXXFLAGS += -DTFLITE_HAVE_CPUINFO
-    TFLITE_HAVE_CPUINFO := true
-  endif
-endif
+#ifeq ($(TARGET_ARCH),x86_64)
+#  ifeq ($(TARGET),linux)
+#    CXXFLAGS += -DTFLITE_HAVE_CPUINFO
+#    TFLITE_HAVE_CPUINFO := true
+#  endif
+#endif
 
 # Auto-detect optimization opportunity if building natively.
 ifeq ($(HOST_OS),$(TARGET))
@@ -140,7 +141,9 @@ $(wildcard tensorflow/lite/core/api/*.cc) \
 $(wildcard tensorflow/lite/delegates/interpreter_utils.cc) \
 $(wildcard tensorflow/lite/experimental/resource/*.cc) \
 $(wildcard tensorflow/lite/schema/schema_utils.cc) \
-$(wildcard tensorflow/lite/tools/make/downloads/ruy/ruy/*.cc)
+$(wildcard tensorflow/lite/tools/make/downloads/ruy/ruy/*.cc) \
+$(wildcard tensorflow/lite/delegates/gpu/gl/*.cc) \
+$(wildcard tensorflow/lite/delegates/gpu/gl_delegate.cc)
 ifeq ($(TFLITE_HAVE_CPUINFO),true)
 CORE_CC_ALL_SRCS += \
 $(wildcard tensorflow/lite/tools/make/downloads/cpuinfo/src/*.c) \
@@ -194,7 +197,7 @@ tensorflow/lite/create_op_resolver_with_selected_ops.cc \
 tensorflow/lite/tflite_with_xnnpack.cc \
 $(MINIMAL_SRCS)
 
-BUILD_WITH_MMAP ?= true
+BUILD_WITH_MMAP ?= false
 ifeq ($(BUILD_TYPE),micro)
 	BUILD_WITH_MMAP=false
 endif
@@ -224,7 +227,7 @@ ifeq ($(BUILD_WITH_RUY_PROFILER),true)
 endif
 
 # Not to include XNNPACK.
-CXXFLAGS += -DTFLITE_WITHOUT_XNNPACK
+#CXXFLAGS += -DTFLITE_WITHOUT_XNNPACK
 
 BUILD_WITH_NNAPI ?= false
 ifeq ($(BUILD_WITH_NNAPI),true)
@@ -304,9 +307,9 @@ BENCHMARK_PERF_OPTIONS_BINARY := $(BINDIR)$(BENCHMARK_PERF_OPTIONS_BINARY_NAME)
 MINIMAL_BINARY := $(BINDIR)minimal
 LABEL_IMAGE_BINARY := $(BINDIR)label_image
 
-CXX := $(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}g++
-CC := $(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}gcc
-AR := $(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}ar
+CXX := emcc #$(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}g++
+CC := emcc #$(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}gcc
+AR := emar #$(CC_PREFIX)${TARGET_TOOLCHAIN_PREFIX}ar
 
 MINIMAL_OBJS := $(addprefix $(OBJDIR), \
 $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(MINIMAL_SRCS))))
