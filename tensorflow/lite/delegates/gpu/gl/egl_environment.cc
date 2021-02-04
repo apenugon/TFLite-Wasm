@@ -20,6 +20,8 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/gl/gl_call.h"
 #include "tensorflow/lite/delegates/gpu/gl/request_gpu_info.h"
 
+#include "tensorflow/lite/minimal_logging.h"
+
 namespace tflite {
 namespace gpu {
 namespace gl {
@@ -78,15 +80,17 @@ absl::Status EglEnvironment::Init() {
     RETURN_IF_ERROR(InitDisplay(&display_));
 
     absl::Status status = InitConfiglessContext();
-    if (!status.ok()) {
-      status = InitSurfacelessContext();
-    }
-    if (!status.ok()) {
-      status = InitPBufferContext();
-    }
+
+    //if (!status.ok()) {
+    //  status = InitSurfacelessContext();
+    //}
+    //if (!status.ok()) {
+    //  status = InitPBufferContext();
+    //}
     if (!status.ok()) {
       return status;
     }
+
   }
 
   if (gpu_info_.vendor == GpuVendor::kUnknown) {
@@ -99,6 +103,7 @@ absl::Status EglEnvironment::Init() {
 
 absl::Status EglEnvironment::InitConfiglessContext() {
   RETURN_IF_ERROR(CreateConfiglessContext(display_, EGL_NO_CONTEXT, &context_));
+
   return context_.MakeCurrentSurfaceless();
 }
 
@@ -116,7 +121,7 @@ absl::Status EglEnvironment::InitSurfacelessContext() {
   }
   return absl::OkStatus();
 }
-
+/*
 absl::Status EglEnvironment::InitPBufferContext() {
   RETURN_IF_ERROR(CreatePBufferContext(display_, EGL_NO_CONTEXT, &context_));
   RETURN_IF_ERROR(CreatePbufferRGBSurface(context_.config(), display_, 1, 1,
@@ -125,7 +130,7 @@ absl::Status EglEnvironment::InitPBufferContext() {
                                           &surface_draw_));
   return context_.MakeCurrent(surface_read_.surface(), surface_draw_.surface());
 }
-
+*/
 void EglEnvironment::ForceSyncTurning() {
   glGenFramebuffers(1, &dummy_framebuffer_);
   glBindFramebuffer(GL_FRAMEBUFFER, dummy_framebuffer_);

@@ -16,6 +16,9 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_DELEGATES_GPU_GL_PORTABLE_EGL_H_
 #define TENSORFLOW_LITE_DELEGATES_GPU_GL_PORTABLE_EGL_H_
 
+#define __ANDROID__
+
+//#include <GL/Regal.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
