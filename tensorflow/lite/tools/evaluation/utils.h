@@ -21,6 +21,8 @@ limitations under the License.
 #include <unordered_set>
 #include <vector>
 
+#define TFLITE_SUPPORTS_GPU_DELEGATE 1
+
 #if defined(__ANDROID__) || defined(CL_DELEGATE_NO_GL)
 #define TFLITE_SUPPORTS_GPU_DELEGATE 1
 #endif

@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================*/
 #include <string>
 
-#define TFLITE_SUPPORTS_GPU_DELEGATE
+#define TFLITE_SUPPORTS_GPU_DELEGATE 1
 
 #include "tensorflow/lite/tools/delegates/delegate_provider.h"
 #include "tensorflow/lite/tools/evaluation/utils.h"
