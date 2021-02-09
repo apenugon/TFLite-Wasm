@@ -57,6 +57,7 @@ absl::Status RequestGpuInfo(GpuInfo* gpu_info) {
   GetGpuInfoFromDeviceDescription(info.opengl_info.renderer_name,
                                   GpuApi::kOpenGl, &info);
 
+  
   GLint extensions_count;
   glGetIntegerv(GL_NUM_EXTENSIONS, &extensions_count);
   info.opengl_info.extensions.resize(extensions_count);
@@ -64,6 +65,9 @@ absl::Status RequestGpuInfo(GpuInfo* gpu_info) {
     info.opengl_info.extensions[i] = std::string(
         reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i)));
   }
+   
+ 
+  
   glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS,
                 &info.opengl_info.max_ssbo_bindings);
   glGetIntegerv(GL_MAX_COMPUTE_IMAGE_UNIFORMS,
@@ -77,9 +81,11 @@ absl::Status RequestGpuInfo(GpuInfo* gpu_info) {
   glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS,
                 &info.opengl_info.max_work_group_invocations);
   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &info.opengl_info.max_texture_size);
-  glGetIntegerv(GL_MAX_IMAGE_UNITS, &info.opengl_info.max_image_units);
+  //glGetIntegerv(GL_MAX_IMAGE_UNITS, &info.opengl_info.max_image_units);
+  info.opengl_info.max_image_units = 8; //Appears this is not supported by GLFW
   glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS,
                 &info.opengl_info.max_array_texture_layers);
+  		
   RETURN_IF_ERROR(GetOpenGlErrors());
   *gpu_info = info;
   return absl::OkStatus();

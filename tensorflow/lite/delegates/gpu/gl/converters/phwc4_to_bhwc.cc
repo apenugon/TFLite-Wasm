@@ -56,12 +56,24 @@ absl::Status ConverterPhwc4ToBhwc::Create(ConverterPhwc4ToBhwc* converter) {
       output_data.elements[(gid.y * sizes_.x + gid.x) * sizes_.z + gid.z] = input_data.elements[(gid.z / 4 * sizes_.y + gid.y) * sizes_.x + gid.x][gid.z % 4];
     })";
 
-  GlShader shader;
-  RETURN_IF_ERROR(
-      GlShader::CompileShader(GL_COMPUTE_SHADER, shader_source, &shader));
-  GlProgram program;
-  RETURN_IF_ERROR(GlProgram::CreateWithShader(shader, &program));
-  *converter = ConverterPhwc4ToBhwc(std::move(program), workgroup_size);
+  GlShader* shader = new GlShader();
+
+  auto status = GlShader::CompileShader(GL_COMPUTE_SHADER, shader_source, shader);
+  RETURN_IF_ERROR(GetOpenGlErrors());
+  if (status != absl::OkStatus()) {
+    return status;
+  }
+
+  GlProgram* program = new GlProgram();
+  status = GlProgram::CreateWithShader(*shader, program);
+
+
+  //return absl::InternalError("Here6");
+  RETURN_IF_ERROR(GetOpenGlErrors());
+  if (status != absl::OkStatus()) {
+    return status;
+  }
+  *converter = ConverterPhwc4ToBhwc(program, workgroup_size);
   return absl::OkStatus();
 }
 
@@ -87,16 +99,16 @@ absl::Status ConverterPhwc4ToBhwc::Convert(const BHWC& shape,
 
   // TODO(akulik): simply pass workload as soon as UniformParameter
   // supports uint3
-  RETURN_IF_ERROR(program_.SetParameter(
+  RETURN_IF_ERROR(program_->SetParameter(
       {"sizes_",
        int4(static_cast<int32_t>(workload.x), static_cast<int32_t>(workload.y),
             static_cast<int32_t>(workload.z), 0)}));
   RETURN_IF_ERROR(source.BindToIndex(0));
   RETURN_IF_ERROR(destination->BindToIndex(1));
   if (command_queue) {
-    return command_queue->Dispatch(program_, num_workgroups);
+    return command_queue->Dispatch(*program_, num_workgroups);
   }
-  return program_.Dispatch(num_workgroups);
+  return program_->Dispatch(num_workgroups);
 }
 
 }  // namespace gl

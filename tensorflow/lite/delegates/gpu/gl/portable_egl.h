@@ -19,7 +19,15 @@ limitations under the License.
 #define __ANDROID__
 
 //#include <GL/Regal.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
+//#include <EGL/egl.h>
+//#include <EGL/eglext.h>
+
+//#define GLFW_INCLUDE_ES31
+//#define GLFW_INCLUDE_GLEXT
+
+#include <GLES3/gl31.h>
+#include <GLES3/gl2ext.h>
+
+#include <GLFW/glfw3.h>
 
 #endif  // TENSORFLOW_LITE_DELEGATES_GPU_GL_PORTABLE_EGL_H_

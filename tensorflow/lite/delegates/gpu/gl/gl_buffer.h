@@ -180,8 +180,9 @@ namespace gl_buffer_internal {
 class BufferId {
  public:
   BufferId() : id_(GL_INVALID_INDEX) {
-    TFLITE_GPU_CALL_GL(glGenBuffers, 1 /* number of buffers */, &id_)
-        .IgnoreError();
+    //TFLITE_GPU_CALL_GL(glGenBuffers, 1 /* number of buffers */, &id_)
+    //    .IgnoreError();
+    glGenBuffers(1, &id_);
     // only possible error here is when a number of buffers is negative.
   }
 

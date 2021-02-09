@@ -40,14 +40,14 @@ class GlShader {
   GlShader() : id_(0) {}
 
   // move-only
-  GlShader(GlShader&& shader);
-  GlShader& operator=(GlShader&& shader);
-  GlShader(const GlShader&) = delete;
-  GlShader& operator=(const GlShader&) = delete;
-
+  //GlShader(GlShader&& shader);
+  //GlShader& operator=(GlShader&& shader);
+  //GlShader(const GlShader&) = delete;
+  //GlShader& operator=(const GlShader&) = delete;
   ~GlShader();
 
   GLuint id() const { return id_; }
+  void setId(GLuint id) { id_ = id; }
 
  private:
   explicit GlShader(GLuint id) : id_(id) {}

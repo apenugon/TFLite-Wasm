@@ -30,16 +30,8 @@ namespace {
 // TODO(akulik): detect power management event when all contexts are destroyed
 // and OpenGL ES is reinitialized. See eglMakeCurrent
 
-absl::Status InitDisplay(EGLDisplay* egl_display) {
-  RETURN_IF_ERROR(
-      TFLITE_GPU_CALL_EGL(eglGetDisplay, egl_display, EGL_DEFAULT_DISPLAY));
-  if (*egl_display == EGL_NO_DISPLAY) {
-    return absl::UnavailableError("eglGetDisplay returned nullptr");
-  }
-  bool is_initialized;
-  RETURN_IF_ERROR(TFLITE_GPU_CALL_EGL(eglInitialize, &is_initialized,
-                                      *egl_display, nullptr, nullptr));
-  if (!is_initialized) {
+absl::Status InitDisplay() {
+  if (!glfwInit()) {
     return absl::InternalError("No EGL error, but eglInitialize failed");
   }
   return absl::OkStatus();
@@ -65,20 +57,20 @@ EglEnvironment::~EglEnvironment() {
 
 absl::Status EglEnvironment::Init() {
   bool is_bound;
-  RETURN_IF_ERROR(
-      TFLITE_GPU_CALL_EGL(eglBindAPI, &is_bound, EGL_OPENGL_ES_API));
-  if (!is_bound) {
-    return absl::InternalError("No EGL error, but eglBindAPI failed");
-  }
+  //RETURN_IF_ERROR(
+  //    TFLITE_GPU_CALL_EGL(eglBindAPI, &is_bound, EGL_OPENGL_ES_API));
+  //if (!is_bound) {
+  //  return absl::InternalError("No EGL error, but eglBindAPI failed");
+  //}
 
   // Re-use context and display if it was created on this thread.
-  if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
-    display_ = eglGetCurrentDisplay();
+  if (glfwGetCurrentContext() != nullptr) {
     context_ =
-        EglContext(eglGetCurrentContext(), display_, EGL_NO_CONFIG_KHR, false);
+        EglContext(glfwGetCurrentContext(), false);
   } else {
-    RETURN_IF_ERROR(InitDisplay(&display_));
+    RETURN_IF_ERROR(InitDisplay());
 
+    //absl::Status status = InitSurfacelessContext();
     absl::Status status = InitConfiglessContext();
 
     //if (!status.ok()) {
@@ -93,23 +85,25 @@ absl::Status EglEnvironment::Init() {
 
   }
 
+
   if (gpu_info_.vendor == GpuVendor::kUnknown) {
     RETURN_IF_ERROR(RequestGpuInfo(&gpu_info_));
   }
+
   // TODO(akulik): when do we need ForceSyncTurning?
   ForceSyncTurning();
   return absl::OkStatus();
 }
 
 absl::Status EglEnvironment::InitConfiglessContext() {
-  RETURN_IF_ERROR(CreateConfiglessContext(display_, EGL_NO_CONTEXT, &context_));
+  RETURN_IF_ERROR(CreateConfiglessContext(&context_));
 
   return context_.MakeCurrentSurfaceless();
 }
 
 absl::Status EglEnvironment::InitSurfacelessContext() {
   RETURN_IF_ERROR(
-      CreateSurfacelessContext(display_, EGL_NO_CONTEXT, &context_));
+      CreateSurfacelessContext(&context_));
   RETURN_IF_ERROR(context_.MakeCurrentSurfaceless());
 
   // PowerVR support EGL_KHR_surfaceless_context, but glFenceSync crashes on
@@ -137,7 +131,8 @@ void EglEnvironment::ForceSyncTurning() {
 
   glGenTextures(1, &dummy_texture_);
   glBindTexture(GL_TEXTURE_2D, dummy_texture_);
-  glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 4, 4);
+  //glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, 4, 4);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          dummy_texture_, 0);
 

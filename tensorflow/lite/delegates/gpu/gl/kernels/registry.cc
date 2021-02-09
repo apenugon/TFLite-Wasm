@@ -57,7 +57,7 @@ namespace gpu {
 namespace gl {
 namespace {
 
-class Registry : public NodeShader {
+class Registry final : public NodeShader {
  public:
   Registry() {
     using Type = OperationType;

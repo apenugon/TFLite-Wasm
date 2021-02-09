@@ -73,7 +73,7 @@ absl::Status GetOpenGlErrors() {
   }
   return absl::InternalError(absl::StrJoin(errors, ",", ErrorFormatter()));
 }
-
+/*
 absl::Status GetEglError() {
   EGLint error = eglGetError();
   switch (error) {
@@ -136,7 +136,7 @@ absl::Status GetEglError() {
   }
   return absl::UnknownError("EGL error: " + std::to_string(error));
 }
-
+*/
 }  // namespace gl
 }  // namespace gpu
 }  // namespace tflite

@@ -40,7 +40,7 @@ class GlProgram {
   // a program. Thus, if this call returns a program, one may set parameters and
   // finally execute a program.
   // therefore it needs to be handled elsewhere.
-  static absl::Status CreateWithShader(const GlShader& shader,
+  static absl::Status CreateWithShader(GlShader shader,
                                        GlProgram* gl_program);
 
   // Same as CreateWithShader but takes compiled shader in a binary form,
@@ -49,14 +49,15 @@ class GlProgram {
                                              GlProgram* gl_program);
 
   // move-only
-  GlProgram(GlProgram&& program);
-  GlProgram& operator=(GlProgram&& program);
-  GlProgram(const GlProgram&) = delete;
-  GlProgram& operator=(const GlProgram&) = delete;
+  //GlProgram(GlProgram&& program);
+  //GlProgram& operator=(GlProgram&& program);
+  //GlProgram(const GlProgram&) = delete;
+  //GlProgram& operator=(const GlProgram&) = delete;
 
   ~GlProgram();
 
   GLuint id() const { return id_; }
+  void setId(GLuint id) { id_ = id; }
 
   // Returns a binary representation for a shader currently attached and linked
   // into this program.

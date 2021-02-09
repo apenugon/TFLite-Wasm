@@ -25,59 +25,57 @@ namespace tflite {
 namespace gpu {
 namespace gl {
 namespace {
-
+/*
 absl::Status GetConfig(EGLDisplay display, const EGLint* attributes,
                        EGLConfig* config) {
   EGLint config_count;
   bool chosen = eglChooseConfig(display, attributes, config, 1, &config_count);
-  RETURN_IF_ERROR(GetOpenGlErrors());
+  RETURN_IF_ERROR(GetEglError());
   if (!chosen || config_count == 0) {
     return absl::InternalError("No EGL error, but eglChooseConfig failed.");
   }
   return absl::OkStatus();
-}
+}*/
 
-absl::Status CreateContext(EGLDisplay display, EGLContext shared_context,
-                           EGLConfig config, EglContext* egl_context) {
-  static const EGLint attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
+absl::Status CreateContext(
+                           EglContext* egl_context) {
 #ifdef _DEBUG  // Add debugging bit
-                                      EGL_CONTEXT_FLAGS_KHR,
-                                      EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR,
 #endif
-                                      EGL_NONE};
-  EGLContext context =
-      eglCreateContext(display, config, shared_context, attributes);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  GLFWwindow* context = glfwCreateWindow(32, 32, "", NULL, NULL);
+  //EGLContext context =
+  //    eglCreateContext(display, config, shared_context, attributes);
   RETURN_IF_ERROR(GetOpenGlErrors());
-  if (context == EGL_NO_CONTEXT) {
+  if (context == nullptr) {
     return absl::InternalError("No EGL error, but eglCreateContext failed.");
   }
-  *egl_context = EglContext(context, display, config, true);
+  *egl_context = EglContext(context, true);
   return absl::OkStatus();
 }
-
+/*
 bool HasExtension(EGLDisplay display, const char* name) {
   return std::strstr(eglQueryString(display, EGL_EXTENSIONS), name);
-}
+}*/
 
 }  // namespace
 
 void EglContext::Invalidate() {
-  if (context_ != EGL_NO_CONTEXT) {
+  if (context_ != nullptr) {
     if (has_ownership_) {
-      eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-      eglDestroyContext(display_, context_);
+      glfwMakeContextCurrent(context_);
+      glfwDestroyWindow(context_);
     }
-    context_ = EGL_NO_CONTEXT;
+    context_ = nullptr;
   }
   has_ownership_ = false;
 }
 
 EglContext::EglContext(EglContext&& other)
     : context_(other.context_),
-      display_(other.display_),
-      config_(other.config_),
       has_ownership_(other.has_ownership_) {
-  other.context_ = EGL_NO_CONTEXT;
+  other.context_ = nullptr;
   other.has_ownership_ = false;
 }
 
@@ -86,51 +84,43 @@ EglContext& EglContext::operator=(EglContext&& other) {
     Invalidate();
     using std::swap;
     swap(context_, other.context_);
-    display_ = other.display_;
-    config_ = other.config_;
     swap(has_ownership_, other.has_ownership_);
   }
   return *this;
 }
 
-absl::Status EglContext::MakeCurrent(EGLSurface read, EGLSurface write) {
-  bool is_made_current = eglMakeCurrent(display_, write, read, context_);
+absl::Status EglContext::MakeCurrent() {
+  glfwMakeContextCurrent(context_);
   RETURN_IF_ERROR(GetOpenGlErrors());
-  if (!is_made_current) {
-    return absl::InternalError("No EGL error, but eglMakeCurrent failed.");
-  }
+  //if (!is_made_current) {
+  //  return absl::InternalError("No EGL error, but eglMakeCurrent failed.");
+  //}
   return absl::OkStatus();
 }
 
 bool EglContext::IsCurrent() const {
-  return context_ == eglGetCurrentContext();
+  return context_ == glfwGetCurrentContext();
 }
 
-absl::Status CreateConfiglessContext(EGLDisplay display,
-                                     EGLContext shared_context,
+absl::Status CreateConfiglessContext(
                                      EglContext* egl_context) {
-  if (!HasExtension(display, "EGL_KHR_no_config_context")) {
-    return absl::UnavailableError("EGL_KHR_no_config_context not supported");
-  }
-  return CreateContext(display, shared_context, EGL_NO_CONFIG_KHR, egl_context);
+  //if (!HasExtension(display, "EGL_KHR_no_config_context")) {
+  //  return absl::UnavailableError("EGL_KHR_no_config_context not supported");
+  //}
+  return CreateContext(egl_context);
 }
 
-absl::Status CreateSurfacelessContext(EGLDisplay display,
-                                      EGLContext shared_context,
+absl::Status CreateSurfacelessContext(
                                       EglContext* egl_context) {
-  if (!HasExtension(display, "EGL_KHR_create_context")) {
-    return absl::UnavailableError("EGL_KHR_create_context not supported");
-  }
-  if (!HasExtension(display, "EGL_KHR_surfaceless_context")) {
-    return absl::UnavailableError("EGL_KHR_surfaceless_context not supported");
-  }
-  const EGLint attributes[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
-                               EGL_NONE};
-  EGLConfig config;
-  RETURN_IF_ERROR(GetConfig(display, attributes, &config));
-  return CreateContext(display, shared_context, config, egl_context);
+  //if (!HasExtension(display, "EGL_KHR_create_context")) {
+  //  return absl::UnavailableError("EGL_KHR_create_context not supported");
+  //}
+  //if (!HasExtension(display, "EGL_KHR_surfaceless_context")) {
+  //  return absl::UnavailableError("EGL_KHR_surfaceless_context not supported");
+  //}
+  return CreateContext(egl_context);
 }
-
+/*
 absl::Status CreatePBufferContext(EGLDisplay display, EGLContext shared_context,
                                   EglContext* egl_context) {
   const EGLint attributes[] = {
@@ -141,7 +131,7 @@ absl::Status CreatePBufferContext(EGLDisplay display, EGLContext shared_context,
   RETURN_IF_ERROR(GetConfig(display, attributes, &config));
   return CreateContext(display, shared_context, config, egl_context);
 }
-
+*/
 }  // namespace gl
 }  // namespace gpu
 }  // namespace tflite

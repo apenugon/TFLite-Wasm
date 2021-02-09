@@ -33,7 +33,10 @@ class DefaultCommandQueue : public CommandQueue {
   absl::Status Dispatch(const GlProgram& program,
                         const uint3& workgroups) override {
     RETURN_IF_ERROR(program.Dispatch(workgroups));
-    return TFLITE_GPU_CALL_GL(glMemoryBarrier, GL_ALL_BARRIER_BITS);
+    //return TFLITE_GPU_CALL_GL(glMemoryBarrier, GL_ALL_BARRIER_BITS);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status WaitForCompletion() override {

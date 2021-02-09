@@ -63,12 +63,14 @@ absl::Status ConverterBhwcToPhwc4::Create(ConverterBhwcToPhwc4* converter) {
       output_data.elements[(gid.z * sizes_.y + gid.y) * sizes_.x + gid.x] = v;
     })";
 
-  GlShader shader;
+  GlShader* shader = new GlShader();
   RETURN_IF_ERROR(
-      GlShader::CompileShader(GL_COMPUTE_SHADER, shader_source, &shader));
-  GlProgram program;
-  RETURN_IF_ERROR(GlProgram::CreateWithShader(shader, &program));
-  *converter = ConverterBhwcToPhwc4(std::move(program), workgroup_size);
+      GlShader::CompileShader(GL_COMPUTE_SHADER, shader_source, shader));
+  //GLint compiled = GL_FALSE;
+  //glGetShaderiv(shader->id(), GL_COMPILE_STATUS, &compiled);
+  GlProgram* program = new GlProgram();
+  RETURN_IF_ERROR(GlProgram::CreateWithShader(*shader, program));
+  *converter = ConverterBhwcToPhwc4(program, workgroup_size);
   return absl::OkStatus();
 }
 
@@ -91,16 +93,16 @@ absl::Status ConverterBhwcToPhwc4::Convert(const BHWC& shape,
   uint3 workload = uint3(shape.w, shape.h, DivideRoundUp(shape.c, 4));
   uint3 num_workgroups = DivideRoundUp(workload, workgroup_size_);
 
-  RETURN_IF_ERROR(program_.SetParameter(
+  RETURN_IF_ERROR(program_->SetParameter(
       {"sizes_",
        int4(static_cast<int32_t>(workload.x), static_cast<int32_t>(workload.y),
             static_cast<int32_t>(workload.z), static_cast<int32_t>(shape.c))}));
   RETURN_IF_ERROR(source.BindToIndex(0));
   RETURN_IF_ERROR(destination->BindToIndex(1));
   if (command_queue) {
-    return command_queue->Dispatch(program_, num_workgroups);
+    return command_queue->Dispatch(*program_, num_workgroups);
   }
-  return program_.Dispatch(num_workgroups);
+  return program_->Dispatch(num_workgroups);
 }
 
 }  // namespace gl

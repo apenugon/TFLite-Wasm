@@ -61,16 +61,16 @@ set(CMAKE_PREFIX_PATH
 set(absl_DIR "${TFLITE_SOURCE_DIR}/tools/cmake/modules")
 
 option(TFLITE_ENABLE_RUY "Enable experimental RUY integration" OFF)
-option(TFLITE_ENABLE_RESOURCE "Enable experimental support for resources" ON)
-option(TFLITE_ENABLE_NNAPI "Enable NNAPI (Android only)." ON)
-option(TFLITE_ENABLE_MMAP "Enable MMAP (unsupported on Windows)" ON)
-option(TFLITE_ENABLE_GPU "Enable GPU" OFF)
+option(TFLITE_ENABLE_RESOURCE "Enable experimental support for resources" OFF)
+option(TFLITE_ENABLE_NNAPI "Enable NNAPI (Android only)." OFF)
+option(TFLITE_ENABLE_MMAP "Enable MMAP (unsupported on Windows)" OFF)
+option(TFLITE_ENABLE_GPU "Enable GPU" ON)
 # This must be enabled when converting from TF models with SELECT_TF_OPS
 # enabled.
 # https://www.tensorflow.org/lite/guide/ops_select#converting_the_model
 # This is currently not supported.
 option(TFLITE_ENABLE_FLEX "Enable SELECT_TF_OPS" OFF) # TODO: Add support
-option(TFLITE_ENABLE_XNNPACK "Enable XNNPACK backend" ON)
+option(TFLITE_ENABLE_XNNPACK "Enable XNNPACK backend" OFF)
 set(CMAKE_CXX_STANDARD 14)  # Some components require C++14.
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(_TFLITE_ENABLE_NNAPI "${TFLITE_ENABLE_NNAPI}")

@@ -33,16 +33,12 @@ class EglContext {
  public:
   // Creates an invalid EglContext.
   EglContext()
-      : context_(EGL_NO_CONTEXT),
-        display_(EGL_NO_DISPLAY),
-        config_(EGL_NO_CONFIG_KHR),
+      : context_(nullptr),
         has_ownership_(false) {}
 
-  EglContext(EGLContext context, EGLDisplay display, EGLConfig config,
+  EglContext(GLFWwindow* context,
              bool has_ownership)
       : context_(context),
-        display_(display),
-        config_(config),
         has_ownership_(has_ownership) {}
 
   // Move only
@@ -53,18 +49,14 @@ class EglContext {
 
   ~EglContext() { Invalidate(); }
 
-  EGLContext context() const { return context_; }
-
-  EGLDisplay display() const { return display_; }
-
-  EGLConfig config() const { return config_; }
+  GLFWwindow* context() const { return context_; }
 
   // Make this EglContext the current EGL context on this thread, replacing
   // the existing current.
-  absl::Status MakeCurrent(EGLSurface read, EGLSurface write);
+  absl::Status MakeCurrent();
 
   absl::Status MakeCurrentSurfaceless() {
-    return MakeCurrent(EGL_NO_SURFACE, EGL_NO_SURFACE);
+    return MakeCurrent();
   }
 
   // Returns true if this is the currently bound EGL context.
@@ -77,26 +69,21 @@ class EglContext {
  private:
   void Invalidate();
 
-  EGLContext context_;
-  EGLDisplay display_;
-  EGLConfig config_;
+  GLFWwindow* context_;
 
   bool has_ownership_;
 };
 
 // It uses the EGL_KHR_no_config_context extension to create a no config context
 // since most modern hardware supports the extension.
-absl::Status CreateConfiglessContext(EGLDisplay display,
-                                     EGLContext shared_context,
+absl::Status CreateConfiglessContext(
                                      EglContext* egl_context);
 
-absl::Status CreateSurfacelessContext(EGLDisplay display,
-                                      EGLContext shared_context,
-                                      EglContext* egl_context);
-
+absl::Status CreateSurfacelessContext(EglContext* egl_context);
+/*
 absl::Status CreatePBufferContext(EGLDisplay display, EGLContext shared_context,
                                   EglContext* egl_context);
-
+*/
 }  // namespace gl
 }  // namespace gpu
 }  // namespace tflite

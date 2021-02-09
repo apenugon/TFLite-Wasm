@@ -18,11 +18,11 @@ limitations under the License.
 
 //#include <GL/Regal.h>
 
-#define HAS_EGL 1
+//#define HAS_EGL 1
 
-#include <EGL/egl.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+//#include <EGL/egl.h>
+//#include <GLES2/gl2.h>
+//#include <GLES2/gl2ext.h>
 
 #define __ANDROID__
 //
@@ -32,10 +32,15 @@ limitations under the License.
 // TODO(camillol): Annotate these with availability attributes for the
 // appropriate versions of Android, by including gl{3,31,31}.h and resetting
 // GL_APICALL for each.
-#undef GL_APICALL
-#define GL_APICALL __attribute__((weak_import)) KHRONOS_APICALL
+//#undef GL_APICALL
+//#define GL_APICALL __attribute__((weak_import)) KHRONOS_APICALL
 #endif  // __ANDROID__
 
 #include <GLES3/gl31.h>
+#include <GLES3/gl2ext.h>
+//#define GLFW_INCLUDE_ES31
+//#define GLFW_INCLUDE_GLEXT
+
+#include <GLFW/glfw3.h>
 
 #endif  // TENSORFLOW_LITE_DELEGATES_GPU_GL_PORTABLE_GL31_H_

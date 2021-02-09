@@ -16,6 +16,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/gl/gl_buffer.h"
 
 #include "tensorflow/lite/delegates/gpu/common/status.h"
+#include <emscripten.h>
 
 namespace tflite {
 namespace gpu {
@@ -77,8 +78,11 @@ void GlBuffer::Invalidate() {
 }
 
 absl::Status GlBuffer::BindToIndex(uint32_t index) const {
-  return TFLITE_GPU_CALL_GL(glBindBufferRange, target_, index, id_, offset_,
-                            bytes_size_);
+  //return TFLITE_GPU_CALL_GL(glBindBufferRange, target_, index, id_, offset_,
+  //                          bytes_size_);
+  glBindBufferRange(target_, index, id_, offset_, bytes_size_);
+  RETURN_IF_ERROR(GetOpenGlErrors());
+  return absl::OkStatus();
 }
 
 absl::Status GlBuffer::MakeView(size_t offset, size_t bytes_size,
@@ -126,7 +130,7 @@ absl::Status CreatePersistentBuffer(size_t size,
                                     GlPersistentBuffer* gl_buffer) {
   PFNGLBUFFERSTORAGEEXTPROC glBufferStorageEXT = nullptr;
   glBufferStorageEXT = reinterpret_cast<PFNGLBUFFERSTORAGEEXTPROC>(
-      eglGetProcAddress("glBufferStorageEXT"));
+      glfwGetProcAddress("glBufferStorageEXT"));
   if (!glBufferStorageEXT) {
     return absl::UnavailableError("glBufferStorageEXT is not supported");
   }
@@ -137,9 +141,19 @@ absl::Status CreatePersistentBuffer(size_t size,
       GL_MAP_COHERENT_BIT_EXT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT |
           GL_MAP_PERSISTENT_BIT_EXT));
   void* data = nullptr;
+  //EM_ASM_(
+  //  {
+  //    Module.ctx.getBufferSubData($0, $1, HEAPU8.subarray($2, $2 + $3));
+  //  }, GL_SHADER_STORAGE_BUFFER, 0, size, data);
+  
+
   RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(
-      glMapBufferRange, &data, GL_SHADER_STORAGE_BUFFER, 0, size,
-      GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT_EXT));
+  glMapBufferRange, &data, GL_SHADER_STORAGE_BUFFER, 0, size,
+  GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT_EXT));
+
+  //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(
+  //    glGetBufferSubData, GL_SHADER_STORAGE_BUFFER, 0, size,
+  //    data));
   *gl_buffer = GlPersistentBuffer{
       GL_SHADER_STORAGE_BUFFER, id.Release(), size, 0, true, data};
   return absl::OkStatus();
@@ -147,13 +161,22 @@ absl::Status CreatePersistentBuffer(size_t size,
 
 namespace gl_buffer_internal {
 
+void* mapBufferRange(GLenum target, size_t offset, size_t bytes) {
+  void* data = nullptr;
+  EM_ASM_(
+    {
+      Module.ctx.getBufferSubData($0, $1, HEAPU8.subarray($2, $2 + $3));
+    }, target, offset, bytes, data);
+  return data;
+}
+
 BufferMapper::BufferMapper(GLenum target, size_t offset, size_t bytes,
                            GLbitfield access)
     : target_(target),
-      data_(glMapBufferRange(target_, offset, bytes, access)) {}
+      data_(mapBufferRange(target_, offset, bytes)) {}
 
 BufferMapper::~BufferMapper() {
-  TFLITE_GPU_CALL_GL(glUnmapBuffer, target_).IgnoreError();
+  //TFLITE_GPU_CALL_GL(glUnmapBuffer, target_).IgnoreError();
 }
 
 };  // namespace gl_buffer_internal

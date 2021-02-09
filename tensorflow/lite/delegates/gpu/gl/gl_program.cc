@@ -30,7 +30,9 @@ namespace gl {
 namespace {
 
 absl::Status CreateNewProgramId(GLuint* program_id) {
-  RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glCreateProgram, program_id));
+  //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glCreateProgram, program_id));
+  *program_id = glCreateProgram();
+  RETURN_IF_ERROR(GetOpenGlErrors());
   if (!*program_id) {
     return absl::UnknownError("Can't create opengl program: 0 program_id");
   }
@@ -54,18 +56,31 @@ absl::Status CheckProgramLinked(GLuint program_id) {
 
 struct ParameterSetter {
   absl::Status operator()(int value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform1i, program_id, uniform_id,
-                              value);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform1i, program_id, uniform_id,
+    //                          value);
+    glUseProgram(program_id);
+    glUniform1i(uniform_id, value);
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const int2& value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform2i, program_id, uniform_id,
-                              value.x, value.y);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform2i, program_id, uniform_id,
+    //                          value.x, value.y);
+    //
+    glUseProgram(program_id);
+    glUniform2i(uniform_id, value.x, value.y);
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const int4& value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform4i, program_id, uniform_id,
-                              value.x, value.y, value.z, value.w);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform4i, program_id, uniform_id,
+    //                          value.x, value.y, value.z, value.w);
+    glUseProgram(program_id);
+    glUniform4i(uniform_id, value.x, value.y, value.z, value.w);
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const std::vector<int2>& value) {
@@ -74,33 +89,62 @@ struct ParameterSetter {
       ints[i * 2] = value[i].x;
       ints[i * 2 + 1] = value[i].y;
     }
-    return TFLITE_GPU_CALL_GL(glProgramUniform2iv, program_id, uniform_id,
-                              ints.size(), ints.data());
+    //return TFLITE_GPU_CALL_GL(glProgramUniform2iv, program_id, uniform_id,
+    //                          ints.size(), ints.data());
+    glUseProgram(program_id);
+    glUniform2iv(uniform_id, ints.size(), ints.data());
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(unsigned int value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform1ui, program_id, uniform_id,
-                              value);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform1ui, program_id, uniform_id,
+    //                          value);
+    glUseProgram(program_id);
+    glUniform1ui(uniform_id, value);
+
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const uint4& value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform4ui, program_id, uniform_id,
-                              value.x, value.y, value.z, value.w);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform4ui, program_id, uniform_id,
+    //                          value.x, value.y, value.z, value.w);
+    glUseProgram(program_id);
+    glUniform4ui(uniform_id, value.x, value.y, value.z, value.w);
+
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(float value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform1f, program_id, uniform_id,
-                              value);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform1f, program_id, uniform_id,
+    //                          value);
+    glUseProgram(program_id);
+    glUniform1f(uniform_id, value);
+
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const float2& value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform2f, program_id, uniform_id,
-                              value.x, value.y);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform2f, program_id, uniform_id,
+    //                          value.x, value.y);
+    glUseProgram(program_id);
+    glUniform2f(uniform_id, value.x, value.y);
+ 
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus(); 
   }
 
   absl::Status operator()(const float4& value) {
-    return TFLITE_GPU_CALL_GL(glProgramUniform4f, program_id, uniform_id,
-                              value.x, value.y, value.z, value.w);
+    //return TFLITE_GPU_CALL_GL(glProgramUniform4f, program_id, uniform_id,
+    //                          value.x, value.y, value.z, value.w);
+    glUseProgram(program_id);
+    glUniform4f(uniform_id, value.x, value.y, value.z, value.w);
+
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   absl::Status operator()(const std::vector<float4>& value) {
@@ -111,8 +155,13 @@ struct ParameterSetter {
       floats[i * 4 + 2] = value[i].z;
       floats[i * 4 + 3] = value[i].w;
     }
-    return TFLITE_GPU_CALL_GL(glProgramUniform4fv, program_id, uniform_id,
-                              floats.size(), floats.data());
+    //return TFLITE_GPU_CALL_GL(glProgramUniform4fv, program_id, uniform_id,
+    //                          floats.size(), floats.data());
+    glUseProgram(program_id);
+    glUniform4fv(uniform_id, floats.size(), floats.data());
+
+    RETURN_IF_ERROR(GetOpenGlErrors());
+    return absl::OkStatus();
   }
 
   const GLuint program_id;
@@ -121,21 +170,39 @@ struct ParameterSetter {
 
 }  // namespace
 
-absl::Status GlProgram::CreateWithShader(const GlShader& shader,
+absl::Status GlProgram::CreateWithShader(GlShader shader,
                                          GlProgram* gl_program) {
   GLuint program_id;
   RETURN_IF_ERROR(CreateNewProgramId(&program_id));
 
   // program_id needs to be properly deleted if there will be an error, hense
   // wrap program_id into Program.
-  GlProgram program(program_id);
+  //GlProgram program(program_id);
 
-  RETURN_IF_ERROR(
-      TFLITE_GPU_CALL_GL(glAttachShader, program.id(), shader.id()));
-  RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glLinkProgram, program.id()));
-  RETURN_IF_ERROR(CheckProgramLinked(program.id()));
+  //RETURN_IF_ERROR(
+  //    TFLITE_GPU_CALL_GL(glAttachShader, program.id(), shader.id()));
+  //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glLinkProgram, program.id()));
+  glAttachShader(program_id, shader.id());
+  RETURN_IF_ERROR(GetOpenGlErrors());
 
-  *gl_program = std::move(program);
+  glLinkProgram(program_id);
+  RETURN_IF_ERROR(GetOpenGlErrors());
+  
+  auto status = CheckProgramLinked(program_id);
+  if (status != absl::OkStatus()) {
+    return status;
+  }
+  RETURN_IF_ERROR(GetOpenGlErrors());
+
+  glValidateProgram(program_id);
+ 
+  //*gl_program = std::move(program);
+  //*gl_program = program;
+  gl_program->setId(program_id);
+
+  glValidateProgram(program_id);
+
+  RETURN_IF_ERROR(GetOpenGlErrors());
   return absl::OkStatus();
 }
 
@@ -179,10 +246,10 @@ absl::Status GlProgram::GetBinary(BinaryShader* binary_shader) {
   *binary_shader = BinaryShader(format, std::move(binary));
   return absl::OkStatus();
 }
-
+/*
 GlProgram::GlProgram(GlProgram&& program) : id_(program.id_) {
   program.id_ = 0;
-}
+}*/
 
 void GlProgram::Invalidate() {
   if (id_) {
@@ -190,21 +257,24 @@ void GlProgram::Invalidate() {
     id_ = 0;
   }
 }
-
+/*
 GlProgram& GlProgram::operator=(GlProgram&& program) {
   if (this != &program) {
     Invalidate();
     std::swap(id_, program.id_);
   }
   return *this;
-}
+}*/
 
 GlProgram::~GlProgram() { Invalidate(); }
 
 absl::Status GlProgram::SetParameter(const Variable& param) {
   GLint uniform_location;
-  RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glGetUniformLocation, &uniform_location,
-                                     id_, param.name.c_str()));
+  //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glGetUniformLocation, &uniform_location,
+  //                                   id_, param.name.c_str()));
+  uniform_location = glGetUniformLocation(id_, param.name.c_str());
+  RETURN_IF_ERROR(GetOpenGlErrors());
+  
   return absl::visit(ParameterSetter{id_, uniform_location}, param.value);
 }
 
@@ -212,9 +282,24 @@ absl::Status GlProgram::Dispatch(const uint3& workgroups) const {
   if (workgroups.x == 0 || workgroups.y == 0 || workgroups.z == 0) {
     return absl::InvalidArgumentError("Invalid workgroups");
   }
-  RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glUseProgram, id_));
-  return TFLITE_GPU_CALL_GL(glDispatchCompute, workgroups.x, workgroups.y,
-                            workgroups.z);
+  //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glUseProgram, id_));
+  //return TFLITE_GPU_CALL_GL(glDispatchCompute, workgroups.x, workgroups.y,
+  //                          workgroups.z);
+  glUseProgram(id_);
+  RETURN_IF_ERROR(GetOpenGlErrors());
+
+  GLint validated;
+  glValidateProgram(id_);
+  glGetProgramiv(id_, GL_VALIDATE_STATUS, &validated);
+  if (validated == GL_FALSE)
+  {
+    return absl::UnavailableError("Not validated");
+  }
+
+  glDispatchCompute(workgroups.x, workgroups.y, workgroups.z);
+  RETURN_IF_ERROR(GetOpenGlErrors());
+
+  return absl::OkStatus();
 }
 
 }  // namespace gl

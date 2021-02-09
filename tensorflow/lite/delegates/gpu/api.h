@@ -74,10 +74,6 @@ enum class ObjectType {
   OPENGL_SSBO,
   OPENGL_TEXTURE,
   CPU_MEMORY,
-  OPENCL_TEXTURE,
-  OPENCL_BUFFER,
-  VULKAN_BUFFER,
-  VULKAN_TEXTURE
 };
 
 struct OpenGlBuffer {

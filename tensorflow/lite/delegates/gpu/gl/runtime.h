@@ -44,7 +44,7 @@ class Runtime {
           CommandQueue* command_queue, const ObjectManager* external_objects);
 
   // Takes parameters and objects and prepares GL program.
-  absl::Status AddProgram(const GlShader& shader,
+  absl::Status AddProgram(GlShader* shader,
                           const std::vector<Variable>& parameters,
                           const std::vector<Object>& objects,
                           const uint3& num_workgroups);
@@ -96,7 +96,7 @@ class Runtime {
 
   // Encapsulates a program and all object to bind before dispatch.
   struct CompiledProgramDescriptor {
-    GlProgram program;
+    GlProgram* program;
     uint3 num_workgroups;
 
     std::vector<BindFunc> bindings;

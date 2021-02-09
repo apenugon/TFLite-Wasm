@@ -34,8 +34,10 @@ class GlSync {
  public:
   static absl::Status NewSync(GlSync* gl_sync) {
     GLsync sync;
-    RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glFenceSync, &sync,
-                                       GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
+    //RETURN_IF_ERROR(TFLITE_GPU_CALL_GL(glFenceSync, &sync,
+    //                                   GL_SYNC_GPU_COMMANDS_COMPLETE, 0));
+    sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    RETURN_IF_ERROR(GetOpenGlErrors());
     *gl_sync = GlSync(sync);
     return absl::OkStatus();
   }

@@ -20,6 +20,7 @@ limitations under the License.
 #endif  // __ARM_ACLE
 
 #include "tensorflow/lite/delegates/gpu/gl/gl_errors.h"
+#include <emscripten.h>
 
 namespace tflite {
 namespace gpu {
@@ -47,12 +48,17 @@ absl::Status GlSyncWait() {
 }
 
 absl::Status GlActiveSyncWait() {
-  GlSync sync;
-  RETURN_IF_ERROR(GlSync::NewSync(&sync));
+  //GlSync sync;
+  //RETURN_IF_ERROR(GlSync::NewSync(&sync));
+  
+  GLsync sync;
+  sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+  RETURN_IF_ERROR(GetOpenGlErrors()); 
+  
   // Since creating a Sync object is itself a GL command it *must* be flushed.
   // Otherwise glGetSynciv may never succeed. Perform a flush with
   // glClientWaitSync call.
-  GLenum status = glClientWaitSync(sync.sync(), GL_SYNC_FLUSH_COMMANDS_BIT,
+  GLenum status = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT,
                                    /* timeout ns = */ 0);
   switch (status) {
     case GL_TIMEOUT_EXPIRED:
@@ -67,10 +73,15 @@ absl::Status GlActiveSyncWait() {
   // Start active loop.
   GLint result = GL_UNSIGNALED;
   while (true) {
-    glGetSynciv(sync.sync(), GL_SYNC_STATUS, sizeof(GLint), nullptr, &result);
+
+    glGetSynciv(sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &result);
     if (result == GL_SIGNALED) {
       return absl::OkStatus();
     }
+    if (result != GL_UNSIGNALED) {
+      return absl::InternalError("Something is wrong");
+    }
+    emscripten_sleep(1);
 #ifdef __ARM_ACLE
     // Try to save CPU power by yielding CPU to another thread.
     __yield();

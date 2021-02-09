@@ -39,10 +39,10 @@ class ConverterPhwc4ToBhwc {
                        GlBuffer* destination);
 
  private:
-  explicit ConverterPhwc4ToBhwc(GlProgram program, const uint3& workgroup_size)
-      : program_(std::move(program)), workgroup_size_(workgroup_size) {}
+  explicit ConverterPhwc4ToBhwc(GlProgram* program, const uint3& workgroup_size)
+      : program_(program), workgroup_size_(workgroup_size) {}
 
-  GlProgram program_;
+  GlProgram* program_;
   uint3 workgroup_size_;
 };
 

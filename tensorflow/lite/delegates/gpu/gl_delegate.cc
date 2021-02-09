@@ -15,7 +15,7 @@ limitations under the License.
 
 #include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 
-#include <EGL/egl.h>
+//#include <EGL/egl.h>
 #include <GLES3/gl31.h>
 
 #include <algorithm>
@@ -204,6 +204,8 @@ class Delegate {
       }
     }
 
+    //return absl::InternalError("Here3");
+
     // Prepare graph outputs.
     //
     // Note that graph.outputs() cannot be used directly, as the notion of
@@ -243,8 +245,19 @@ class Delegate {
     }
 
     // Create shaders to convert from/to phwc4.
+    //
+    //return absl::InternalError("Here3");
+
+
+
     RETURN_IF_ERROR(ConverterBhwcToPhwc4::Create(&bhwc_to_phwc4_));
-    RETURN_IF_ERROR(ConverterPhwc4ToBhwc::Create(&phwc4_to_bhwc_));
+    auto status = ConverterPhwc4ToBhwc::Create(&phwc4_to_bhwc_);
+    if (status != absl::OkStatus()) {
+	return status;
+    }
+
+
+
 
     // Compile model.
     CompilationOptions compile_options;
@@ -273,12 +286,13 @@ class Delegate {
     RETURN_IF_ERROR(compiled_model->NewRun(runtime_options, &phwc4_objects_,
                                            command_queue_.get(),
                                            &inference_context_));
+
     return absl::OkStatus();
   }
 
   absl::Status Invoke(TfLiteContext* context) {
-    const EGLContext egl_context_at_delegate_init = env_->context().context();
-    const EGLContext egl_context_at_delegate_invoke = eglGetCurrentContext();
+    const GLFWwindow* egl_context_at_delegate_init = env_->context().context();
+    const GLFWwindow* egl_context_at_delegate_invoke = glfwGetCurrentContext();
     if (egl_context_at_delegate_init != egl_context_at_delegate_invoke) {
       return absl::FailedPreconditionError(
           "Delegate should run on the same thread where it was initialized.");
@@ -306,6 +320,7 @@ class Delegate {
     // Run inference.
     RETURN_IF_ERROR(inference_context_->Reset());
     RETURN_IF_ERROR(inference_context_->Execute());
+    //return absl::InvalidArgumentError("Here2");
 
     // Push output data from GPU to a tensor.
     bool finished_gpu_processing = false;

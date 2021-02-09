@@ -570,7 +570,7 @@ class InferenceBuilderImpl : public InferenceBuilder {
     auto compiler = NewCompiler(kernels.get(), gpu_info_, compiler_options);
     auto workgroup_calculator = NewDefaultWorkgroupsCalculator(*gpu_info_);
     auto external_objects = absl::make_unique<ObjectManager>();
-    std::vector<GlShader> shaders;
+    std::vector<GlShader*> shaders;
     absl::flat_hash_map<std::string, size_t> shader_to_index;
     RuntimeOptions runtime_options;
     auto runtime =
@@ -589,10 +589,10 @@ class InferenceBuilderImpl : public InferenceBuilder {
           // Check if a shader was already compiled.
           auto it = shader_to_index.find(shader_src);
           if (it == shader_to_index.end()) {
-            GlShader shader;
+            GlShader* shader = new GlShader();
             RETURN_IF_ERROR(GlShader::CompileShader(GL_COMPUTE_SHADER,
-                                                    shader_src, &shader));
-            shaders.push_back(std::move(shader));
+                                                    shader_src, shader));
+            shaders.push_back(shader);
             shader_to_index.insert({shader_src, shader_to_index.size()});
             shader_index = shader_to_index.size() - 1;
           } else {

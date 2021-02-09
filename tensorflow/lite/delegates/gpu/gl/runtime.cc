@@ -250,19 +250,22 @@ Runtime::Runtime(const RuntimeOptions& options, const GpuInfo& gpu_info,
   }
 }
 
-absl::Status Runtime::AddProgram(const GlShader& shader,
+absl::Status Runtime::AddProgram(GlShader* shader,
                                  const std::vector<Variable>& parameters,
                                  const std::vector<Object>& objects,
                                  const uint3& num_workgroups) {
-  GlProgram program;
-  RETURN_IF_ERROR(GlProgram::CreateWithShader(shader, &program));
+  GlProgram* program = new GlProgram();
+
+  RETURN_IF_ERROR(GlProgram::CreateWithShader(*shader, program));
+  glValidateProgram(program->id());
+
 
   for (auto& parameter : parameters) {
-    RETURN_IF_ERROR(program.SetParameter(parameter));
+    RETURN_IF_ERROR(program->SetParameter(parameter));
   }
 
   programs_.emplace_back(
-      CompiledProgramDescriptor{std::move(program), num_workgroups, {}});
+      CompiledProgramDescriptor{program, num_workgroups, {}});
 
   // Create const buffers, resolve external references and collect internal
   // buffer references.
@@ -647,7 +650,7 @@ absl::Status Runtime::Execute() {
     for (auto& b : descriptor.bindings) {
       RETURN_IF_ERROR(b());
     }
-    RETURN_IF_ERROR(command_queue_->Dispatch(descriptor.program,
+    RETURN_IF_ERROR(command_queue_->Dispatch(*descriptor.program,
                                              descriptor.num_workgroups));
   }
   return absl::OkStatus();

@@ -20,7 +20,6 @@ limitations under the License.
 
 #include "tensorflow/lite/delegates/gpu/common/status.h"
 #include "tensorflow/lite/delegates/gpu/gl/egl_context.h"
-#include "tensorflow/lite/delegates/gpu/gl/egl_surface.h"
 #include "tensorflow/lite/delegates/gpu/gl/portable_egl.h"
 #include "tensorflow/lite/delegates/gpu/gl/portable_gl31.h"
 #include "tensorflow/lite/delegates/gpu/gl/request_gpu_info.h"
@@ -43,7 +42,6 @@ class EglEnvironment {
   ~EglEnvironment();
 
   const EglContext& context() const { return context_; }
-  EGLDisplay display() const { return display_; }
   const GpuInfo& gpu_info() const { return gpu_info_; }
 
  private:
@@ -52,9 +50,6 @@ class EglEnvironment {
   absl::Status InitSurfacelessContext();
   absl::Status InitPBufferContext();
 
-  EGLDisplay display_ = EGL_NO_DISPLAY;
-  EglSurface surface_draw_;
-  EglSurface surface_read_;
   EglContext context_;
   GpuInfo gpu_info_;
 

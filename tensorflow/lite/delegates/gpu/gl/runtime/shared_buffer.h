@@ -36,7 +36,7 @@ namespace gl {
 class SharedBufferData {
  public:
   SharedBufferData() {
-    glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &alignment_);
+    //glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &alignment_);
   }
 
   // @return true if data was added to the shared buffer.

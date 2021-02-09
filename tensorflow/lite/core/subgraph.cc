@@ -248,8 +248,8 @@ Subgraph::~Subgraph() {
     TfLiteTensor* tensor = &context_.tensors[i];
     if (tensor->buffer_handle != kTfLiteNullBufferHandle &&
         tensor->delegate->FreeBufferHandle != nullptr) {
-      tensor->delegate->FreeBufferHandle(&context_, tensor->delegate,
-                                         &tensor->buffer_handle);
+      //tensor->delegate->FreeBufferHandle(&context_, tensor->delegate,
+      //                                   &tensor->buffer_handle);
     }
     TfLiteTensorFree(tensor);
   }

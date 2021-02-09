@@ -230,10 +230,10 @@ class CompiledModelImpl
     std::string shader_src = GetShaderHeader(workgroup_size) + partial_shader;
     auto it = shader_to_index_.find(shader_src);
     if (it == shader_to_index_.end()) {
-      GlShader shader;
+      GlShader* shader = new GlShader();
       RETURN_IF_ERROR(
-          GlShader::CompileShader(GL_COMPUTE_SHADER, shader_src, &shader));
-      shaders_.push_back(std::move(shader));
+          GlShader::CompileShader(GL_COMPUTE_SHADER, shader_src, shader));
+      shaders_.push_back(shader);
       shader_to_index_.insert({shader_src, shader_to_index_.size()});
       *size = shader_to_index_.size() - 1;
     } else {
@@ -266,6 +266,7 @@ class CompiledModelImpl
                                           program.parameters, program.objects,
                                           program.num_workgroups));
     }
+
     RETURN_IF_ERROR(runtime->PrepareForExecution());
     if (dynamic_batch_) {
       *inference_context = absl::make_unique<InferenceContextWithBatchImpl>(
@@ -363,7 +364,7 @@ class CompiledModelImpl
   bool dynamic_batch_ = false;
 
   std::vector<std::string> partial_shaders_;
-  std::vector<GlShader> shaders_;
+  std::vector<GlShader*> shaders_;
 
   // Shaders are serialized in order of their indices.
   absl::flat_hash_map<std::string, size_t> shader_to_index_;
