@@ -1,3 +1,14 @@
+See below for the standard Tensorflow README
+
+This code is a fork of Tensorflow that will compile to WebGL with the GPU backend enabled, mapping GPU calls to WASM. You will need to use emscripten to compile this (the latest emscripten).
+
+THIS CODE IS HIGHLY EXPERIMENTAL
+
+This may or may not work for you on your machine - try at your own risk.
+
+-------------------
+
+
 <div align="center">
   <img src="https://www.tensorflow.org/images/tf_logo_social.png">
 </div>
